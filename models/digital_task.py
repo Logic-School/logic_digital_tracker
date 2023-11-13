@@ -32,12 +32,10 @@ class DigitalTask(models.Model):
     task_head = fields.Many2one('res.users',string="Digital Head", required=True,domain=lambda self:  [('id', 'in', self.env.ref('logic_digital_tracker.group_digital_head').users.ids)], default=get_default_digital_head)
     
     def get_digital_executives_domain(self):
-        digital_execs = self.env.ref('logic_digital_tracker.group_digital_executive').users.ids
-        if digital_execs:
-            digital_execs.append(self.env.user.id)
-            return [('id', 'in', digital_execs)]
-        else:
-            return [('id','in',[self.env.user.id])]
+        execs = []
+        execs.extend(self.sudo().env.ref('logic_digital_tracker.group_digital_executive').users.ids)
+        execs.extend(self.sudo().env.ref('logic_digital_tracker.group_digital_head').users.ids)
+        return [('id', 'in', execs)]
     assigned_execs = fields.Many2many('res.users',string="Assigned To",domain=get_digital_executives_domain)
     
     @api.depends('assigned_execs')
